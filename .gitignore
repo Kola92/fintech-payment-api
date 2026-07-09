@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+.npm
+
+# Build output
+dist/
+build/
+
+# Environment files — NEVER commit these
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Docker volumes (if mounted locally)
+docker/volumes/
+
+# TypeScript cache
+*.tsbuildinfo
