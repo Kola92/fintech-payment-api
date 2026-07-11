@@ -1,11 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { getPool } from './client.js';
+import { getPool } from './client';
 
 async function migrate(): Promise<void> {
   const pool = getPool();
 
-  // Migrations tracking table — knows which files have already run
   await pool.query(`
     CREATE TABLE IF NOT EXISTS _migrations (
       id          SERIAL PRIMARY KEY,
@@ -17,7 +16,7 @@ async function migrate(): Promise<void> {
   const migrationsDir = path.join(__dirname, 'migrations');
   const files = fs.readdirSync(migrationsDir)
     .filter(f => f.endsWith('.sql'))
-    .sort(); // lexicographic sort — 001_ prefix guarantees order
+    .sort();
 
   for (const file of files) {
     const { rows } = await pool.query(

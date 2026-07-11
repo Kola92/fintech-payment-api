@@ -10,10 +10,15 @@
     "dev:api": "npm run dev --workspace=apps/api",
     "dev:worker": "npm run dev --workspace=apps/worker",
     "build": "npm run build --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "lint": "npm run lint --workspaces --if-present",
+    "migrate": "dotenv -e .env -- ts-node --transpile-only --project packages/shared/tsconfig.json packages/shared/src/db/migrate.ts"
   },
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^11.0.0",
+    "ts-node": "^10.9.2"
   }
 }
