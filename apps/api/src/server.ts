@@ -5,6 +5,8 @@ import { apiKeyPlugin } from './plugins/apiKey';
 import { healthRoutes } from './routes/health';
 import { paymentRoutes } from './routes/payments';
 import { webhookRoutes } from './routes/webhooks';
+import { paymentSchema, errorSchema } from './schemas/payment.schema';
+import { webhookSchema, webhookDeliverySchema } from './schemas/webhook.schema';
 
 export async function buildApp() {
   const app = Fastify({
@@ -17,12 +19,15 @@ export async function buildApp() {
     },
   });
 
-  // Plugins — order matters in Fastify. Swagger first so routes
-  // registered after it are automatically included in the spec.
+  // Register shared schemas before routes — routes reference these via $ref
+  app.addSchema(paymentSchema);
+  app.addSchema(errorSchema);
+  app.addSchema(webhookSchema);
+  app.addSchema(webhookDeliverySchema);
+
   await app.register(swaggerPlugin);
   await app.register(apiKeyPlugin);
 
-  // Routes
   await app.register(healthRoutes);
   await app.register(paymentRoutes, { prefix: '/api/v1' });
   await app.register(webhookRoutes, { prefix: '/api/v1' });
