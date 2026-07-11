@@ -20,18 +20,23 @@ export async function healthRoutes(app: FastifyInstance) {
       },
     },
   }, async (_request, reply) => {
-    const checks = { postgres: 'ok', redis: 'ok' };
+    const checks: Record<string, string> = {
+      postgres: 'ok',
+      redis: 'ok',
+    };
 
     try {
       await getPool().query('SELECT 1');
-    } catch {
+    } catch (err) {
       checks.postgres = 'error';
+      console.error('[health] PostgreSQL error:', (err as Error).message);
     }
 
     try {
       await getRedis().ping();
-    } catch {
+    } catch (err) {
       checks.redis = 'error';
+      console.error('[health] Redis error:', (err as Error).message);
     }
 
     const healthy = Object.values(checks).every((v) => v === 'ok');

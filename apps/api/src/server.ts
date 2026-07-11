@@ -1,4 +1,10 @@
-import 'dotenv/config';
+// Load .env from repo root before any other imports.
+// process.cwd() when running via npm workspace points to apps/api/,
+// so we walk up two levels to reach the monorepo root.
+import path from 'path';
+import dotenv from 'dotenv';
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+
 import Fastify from 'fastify';
 import { swaggerPlugin } from './plugins/swagger';
 import { apiKeyPlugin } from './plugins/apiKey';
@@ -19,7 +25,6 @@ export async function buildApp() {
     },
   });
 
-  // Register shared schemas before routes — routes reference these via $ref
   app.addSchema(paymentSchema);
   app.addSchema(errorSchema);
   app.addSchema(webhookSchema);
