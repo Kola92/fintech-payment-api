@@ -1,4 +1,7 @@
-import 'dotenv/config';
+import path from 'path';
+import dotenv from 'dotenv';
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+
 import { Worker } from 'bullmq';
 import { WEBHOOK_QUEUE_NAME, getBullMQRedis } from '@fintech/shared';
 import { processWebhookDelivery } from './processors/webhookDelivery';
@@ -8,7 +11,7 @@ const worker = new Worker(
   processWebhookDelivery,
   {
     connection: getBullMQRedis(),
-    concurrency: 5, // process up to 5 delivery jobs simultaneously
+    concurrency: 5,
   }
 );
 
@@ -26,7 +29,6 @@ worker.on('error', (err) => {
 
 console.log(`[worker] Listening on queue: ${WEBHOOK_QUEUE_NAME}`);
 
-// Graceful shutdown — finish in-flight jobs before exiting
 process.on('SIGTERM', async () => {
   console.log('[worker] Shutting down gracefully...');
   await worker.close();
