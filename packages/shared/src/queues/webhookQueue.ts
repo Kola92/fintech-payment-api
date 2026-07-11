@@ -1,6 +1,6 @@
 import { Queue, QueueOptions } from 'bullmq';
-import { getBullMQRedis } from '../redis/client.js';
-import type { WebhookDeliveryJobData } from '../types/index.js';
+import { getBullMQRedis } from '../redis/client';
+import type { WebhookDeliveryJobData } from '../types/index';
 
 // Single source of truth for queue name — if this changes,
 // TypeScript will catch every reference that needs updating
