@@ -20,7 +20,10 @@ export const webhookDeliverySchema = {
     webhook_id: { type: 'string', format: 'uuid' },
     payment_id: { type: 'string', format: 'uuid' },
     event: { type: 'string' },
-    payload: { type: 'object' },
+    payload: {
+      type: 'object',
+      additionalProperties: true,  // allow the full event structure through
+    },
     status: { type: 'string' },
     attempt_count: { type: 'integer' },
     last_attempt_at: { type: 'string', format: 'date-time', nullable: true },

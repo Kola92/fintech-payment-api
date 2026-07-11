@@ -56,7 +56,7 @@ export async function createPayment(
         input.currency ?? 'NGN',
         generateReference(),
         input.description ?? null,
-        input.metadata ? JSON.stringify(input.metadata) : null,
+        input.metadata ? input.metadata : null,
       ]
     );
 
@@ -85,7 +85,7 @@ export async function createPayment(
           (webhook_id, payment_id, event, payload, status)
          VALUES ($1, $2, 'payment.created', $3, 'pending')
          RETURNING id`,
-        [webhook.id, payment.id, JSON.stringify(payload)]
+        [webhook.id, payment.id, payload]
       );
 
       deliveryJobData.push({

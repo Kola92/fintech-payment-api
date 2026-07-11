@@ -11,10 +11,6 @@ export async function registerWebhook(
   input: RegisterWebhookInput
 ): Promise<Webhook> {
   const pool = getPool();
-
-  // Generate a random signing secret — the caller never provides this.
-  // It's used by the worker to sign outbound payloads via HMAC-SHA256.
-  // The receiving server uses it to verify the signature on their end.
   const secret = crypto.randomBytes(32).toString('hex');
 
   const { rows } = await pool.query<Webhook>(
@@ -57,8 +53,15 @@ export async function getDeliveriesForPayment(
   paymentId: string
 ): Promise<WebhookDelivery[]> {
   const pool = getPool();
+  // Cast JSONB payload explicitly — pg driver returns JSONB as parsed object
+  // but only when selected directly. Explicit cast ensures consistent behaviour.
   const { rows } = await pool.query<WebhookDelivery>(
-    `SELECT * FROM webhook_deliveries
+    `SELECT
+       id, webhook_id, payment_id, event,
+       payload::jsonb as payload,
+       status, attempt_count, last_attempt_at,
+       next_attempt_at, delivered_at, error_message, created_at
+     FROM webhook_deliveries
      WHERE payment_id = $1
      ORDER BY created_at DESC`,
     [paymentId]
@@ -71,7 +74,13 @@ export async function getDeliveryById(
 ): Promise<WebhookDelivery | null> {
   const pool = getPool();
   const { rows } = await pool.query<WebhookDelivery>(
-    'SELECT * FROM webhook_deliveries WHERE id = $1',
+    `SELECT
+       id, webhook_id, payment_id, event,
+       payload::jsonb as payload,
+       status, attempt_count, last_attempt_at,
+       next_attempt_at, delivered_at, error_message, created_at
+     FROM webhook_deliveries
+     WHERE id = $1`,
     [id]
   );
   return rows[0] ?? null;
