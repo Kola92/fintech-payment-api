@@ -30,3 +30,8 @@ docker/volumes/
 
 # TypeScript cache
 *.tsbuildinfo
+
+# Compiled output — built by Railway/CI, not committed
+apps/api/dist/
+apps/worker/dist/
+packages/shared/dist/

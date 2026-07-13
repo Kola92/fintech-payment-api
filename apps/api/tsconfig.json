@@ -4,7 +4,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "paths": {
-      "@fintech/shared": ["../../packages/shared/src"]
+      "@fintech/shared": ["../../packages/shared/dist/index.d.ts"]
     }
   },
   "include": ["src/**/*"]

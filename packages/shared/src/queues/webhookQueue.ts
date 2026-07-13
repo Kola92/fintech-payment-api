@@ -1,41 +1,50 @@
 import { Queue, QueueOptions } from 'bullmq';
-import { getBullMQRedis } from '../redis/client';
 import type { WebhookDeliveryJobData } from '../types/index';
 
-// Single source of truth for queue name — if this changes,
-// TypeScript will catch every reference that needs updating
 export const WEBHOOK_QUEUE_NAME = 'webhook-delivery';
 
-// Shared queue options — producer and consumer must agree on these.
-// Defining once here prevents silent config drift between services.
+// Pass Redis URL string instead of ioredis instance — avoids type conflicts
+// between BullMQ's bundled ioredis and our top-level ioredis installation.
+// BullMQ creates its own connection internally when given connection options.
+function getRedisConnection() {
+  const url = process.env.REDIS_URL ?? 'redis://localhost:6379';
+  // Parse URL into host/port for BullMQ connection options
+  const parsed = new URL(url);
+  return {
+    host: parsed.hostname,
+    port: parseInt(parsed.port || '6379', 10),
+    password: parsed.password || undefined,
+  };
+}
+
 export const WEBHOOK_QUEUE_OPTIONS: QueueOptions = {
-  connection: getBullMQRedis(),
+  connection: getRedisConnection(),
   defaultJobOptions: {
     attempts: 5,
     backoff: {
       type: 'exponential',
-      delay: 1000, // first retry after 1s, then 2s, 4s, 8s, 16s
+      delay: 1000,
     },
     removeOnComplete: {
-      age: 24 * 3600, // keep completed jobs for 24 hours
-      count: 1000,    // keep last 1000 completed jobs max
+      age: 24 * 3600,
+      count: 1000,
     },
     removeOnFail: {
-      age: 7 * 24 * 3600, // keep failed jobs for 7 days — audit trail
+      age: 7 * 24 * 3600,
     },
   },
 };
 
-// Queue instance used by the API to enqueue webhook delivery jobs.
-// Typed with WebhookDeliveryJobData so TypeScript catches payload
-// shape mismatches at the call site, not at runtime in the worker.
 let webhookQueue: Queue<WebhookDeliveryJobData> | null = null;
 
 export function getWebhookQueue(): Queue<WebhookDeliveryJobData> {
   if (!webhookQueue) {
     webhookQueue = new Queue<WebhookDeliveryJobData>(
       WEBHOOK_QUEUE_NAME,
-      WEBHOOK_QUEUE_OPTIONS
+      {
+        connection: getRedisConnection(),
+        defaultJobOptions: WEBHOOK_QUEUE_OPTIONS.defaultJobOptions,
+      }
     );
 
     webhookQueue.on('error', (err) => {

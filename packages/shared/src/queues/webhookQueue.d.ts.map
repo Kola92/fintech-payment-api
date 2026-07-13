@@ -1,0 +1,1 @@
+{"version":3,"file":"webhookQueue.d.ts","sourceRoot":"","sources":["webhookQueue.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,EAAE,YAAY,EAAE,MAAM,QAAQ,CAAC;AAC7C,OAAO,KAAK,EAAE,sBAAsB,EAAE,MAAM,gBAAgB,CAAC;AAE7D,eAAO,MAAM,kBAAkB,qBAAqB,CAAC;AAgBrD,eAAO,MAAM,qBAAqB,EAAE,YAgBnC,CAAC;AAIF,wBAAgB,eAAe,IAAI,KAAK,CAAC,sBAAsB,CAAC,CAgB/D"}

@@ -1,0 +1,12 @@
+[build]
+builder = "nixpacks"
+
+[[services]]
+name = "api"
+buildCommand = "npm run build:api"
+startCommand = "npm run start:api"
+
+[[services]]
+name = "worker"
+buildCommand = "npm run build:worker"
+startCommand = "npm run start:worker"

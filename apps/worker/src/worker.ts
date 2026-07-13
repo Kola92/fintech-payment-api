@@ -3,14 +3,24 @@ import dotenv from 'dotenv';
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 import { Worker } from 'bullmq';
-import { WEBHOOK_QUEUE_NAME, getBullMQRedis } from '@fintech/shared';
+import { WEBHOOK_QUEUE_NAME } from '@fintech/shared';
 import { processWebhookDelivery } from './processors/webhookDelivery';
+
+function getRedisConnection() {
+  const url = process.env.REDIS_URL ?? 'redis://localhost:6379';
+  const parsed = new URL(url);
+  return {
+    host: parsed.hostname,
+    port: parseInt(parsed.port || '6379', 10),
+    password: parsed.password || undefined,
+  };
+}
 
 const worker = new Worker(
   WEBHOOK_QUEUE_NAME,
   processWebhookDelivery,
   {
-    connection: getBullMQRedis(),
+    connection: getRedisConnection(),
     concurrency: 5,
   }
 );
