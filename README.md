@@ -30,20 +30,7 @@ curl https://fintechapi-production-f9a7.up.railway.app/health
 
 ## Architecture
 
-```
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   Fastify API   │────▶│   PostgreSQL      │     │  BullMQ Worker  │
-│   (apps/api)    │     │   payments        │     │  (apps/worker)  │
-│                 │────▶│   webhooks        │◀────│                 │
-│  POST /payments │     │   deliveries      │     │  HMAC signing   │
-│  POST /webhooks │     └──────────────────┘     │  HTTP delivery  │
-└────────┬────────┘                               └────────▲────────┘
-         │              ┌──────────────────┐               │
-         └─────────────▶│      Redis        │───────────────┘
-                         │  idempotency keys │
-                         │  BullMQ queues    │
-                         └──────────────────┘
-```
+   ![Architecture diagram showing Fastify API, PostgreSQL, BullMQ Worker, and Redis](docs/images/architecture-diagram.png)
 
 ### Key patterns
 
