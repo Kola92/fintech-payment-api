@@ -7,7 +7,30 @@ delivery with exponential backoff, and distributed job processing.
 
 ---
 
+## Status
+
+**Deployed and live.**
+
+- API: https://fintechapi-production-f9a7.up.railway.app
+- Health check: https://fintechapi-production-f9a7.up.railway.app/health
+- Swagger docs: https://fintechapi-production-f9a7.up.railway.app/docs
+- Infra: Railway (PostgreSQL + Redis + API + Worker services)
+
+```bash
+curl https://fintechapi-production-f9a7.up.railway.app/health
+# {"status":"ok","postgres":"ok","redis":"ok","uptime":<seconds>}
+```
+
+> **Note:** This runs on Railway's free trial credit, which is usage-based
+> and finite — not a renewing monthly quota. If the live link is
+> unresponsive, the credit may have been exhausted. Reach out and I'll
+> redeploy, or check `docs/DECISIONS.md` for the infra notes.
+
+---
+
 ## Architecture
+
+```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
 │   Fastify API   │────▶│   PostgreSQL      │     │  BullMQ Worker  │
 │   (apps/api)    │     │   payments        │     │  (apps/worker)  │
@@ -15,11 +38,12 @@ delivery with exponential backoff, and distributed job processing.
 │  POST /payments │     │   deliveries      │     │  HMAC signing   │
 │  POST /webhooks │     └──────────────────┘     │  HTTP delivery  │
 └────────┬────────┘                               └────────▲────────┘
-│              ┌──────────────────┐               │
-└─────────────▶│      Redis        │───────────────┘
-│  idempotency keys │
-│  BullMQ queues    │
-└──────────────────┘
+         │              ┌──────────────────┐               │
+         └─────────────▶│      Redis        │───────────────┘
+                         │  idempotency keys │
+                         │  BullMQ queues    │
+                         └──────────────────┘
+```
 
 ### Key patterns
 
@@ -41,6 +65,8 @@ using a per-webhook secret. Signature sent in `X-Webhook-Signature: sha256=<hex>
 ---
 
 ## Project structure
+
+```
 fintech-payment-api/
 ├── apps/
 │   ├── api/          # Fastify HTTP server
@@ -50,8 +76,9 @@ fintech-payment-api/
 ├── docker/
 │   └── docker-compose.yml  # PostgreSQL + Redis for local dev
 └── docs/
-├── ARCHITECTURE.md
-└── DECISIONS.md
+    ├── ARCHITECTURE.md
+    └── DECISIONS.md
+```
 
 ---
 
@@ -152,6 +179,7 @@ See [docs/DECISIONS.md](docs/DECISIONS.md) for full ADR log covering:
 - Why Redis for idempotency (not PostgreSQL)
 - Why enqueue after commit (not inside the transaction)
 - Why shared queue definitions prevent silent failures
+- A Railway build-cache incident during deployment and how it was diagnosed
 
 ---
 
